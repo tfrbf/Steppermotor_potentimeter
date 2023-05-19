@@ -4,28 +4,30 @@
 
 #define potentiometer A0
 #define servo_pin 5
-char key_values[3];
+
 char key;
-int currentValue =0 ;
-int previousValue =0 ;
+int currentValue = 0;
+int previousValue = 0;
 int position;
-const byte ROWS = 4; //تعداد ردیف
-const byte COLS = 4; //تعداد ستون
+const byte ROWS = 4;  
+const byte COLS = 4;  
+
 char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+  { '1', '2', '3', 'A' },
+  { '4', '5', '6', 'B' },
+  { '7', '8', '9', 'C' },
+  { '*', '0', '#', 'D' }
 };
-byte rowPins[ROWS] = {13, 12, 11, 10}; //اتصال پایه های ردیف
-byte colPins[COLS] = {9, 8, 7, 6}; //پین های مربوط به ستون ها
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
+byte rowPins[ROWS] = { 13, 12, 11, 10 };  
+byte colPins[COLS] = { 9, 8, 7, 6 };      
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 Adafruit_LiquidCrystal lcd(0);
 Servo servo;
 
-void setup()
-{
+void setup() {
+  Serial.begin(9600);
   lcd.begin(16, 2);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
@@ -34,72 +36,73 @@ void setup()
   lcd.print("Select Mode: ");
 }
 
-void loop()
-{
+void loop() {
+
   key = keypad.getKey();
-  if(key)
-  {
-    
-    if(key == 'A') 
-    { lcd.clear();
-      lcd.print("potentiometer mode");
-     delay(100);
-     while(key == 'A') potentiometer_mode();
+  if (key) {
+
+    if (key == 'A') {
+      lcd.clear();
+      lcd.print("pot mode");
+      delay(1000);
+      while (key == 'A') potentiometer_mode();
     }
-    
-    if(key == 'B') 
-    { lcd.clear();
+
+    if (key == 'B') {
+      lcd.clear();
       lcd.print("Keypad mode");
-     delay(100);
-     while(key == 'B') keypad_mode;
+      delay(1000);
+      lcd.clear();
+      lcd.print("Angle: ");
+      while (key == 'B') keypad_mode();
     }
-    
   }
 
-
-  
   delay(100);
 }
 
 
 
-void potentiometer_mode()
-{
+void potentiometer_mode() {
   currentValue = analogRead(potentiometer);
-  position = map(currentValue,0,1023,0,180);
+  position = map(currentValue, 0, 1023, 0, 180);
   servo.write(position);
   // If the value has changed, update the LCD display
   if (currentValue != previousValue) {
     lcd.clear();
 
-    lcd.setCursor(0,0);
+    lcd.setCursor(0, 0);
     lcd.print("Pot: ");
     lcd.print(currentValue);
-    
-	lcd.setCursor(0,1);
+
+    lcd.setCursor(0, 1);
     lcd.print("Servo: ");
     lcd.print(position);
-    
+
     previousValue = currentValue;
   }
 }
 
 
-void keypad_mode()
-{
-  
-  key_values[2] = keypad.getKey();
-  key_values[1] = keypad.getKey();
-  key_values[0] = keypad.getKey();
-  position = key_values[2]*100 + key_values[1]*10 + key_values[0];
-  servo.write(position);
-  
-  lcd.setCursor(0,0);
-    lcd.print("kaypad: ");
-    lcd.print(currentValue);
-    
-	lcd.setCursor(0,1);
-    lcd.print("Servo: ");
-    lcd.print(position);
-  
+void keypad_mode() {
+
+  char key = keypad.getKey();  // Read the keypad input
+
+  if (key) {             // If a key is pressed
+    if (isdigit(key)) {  // Check if the pressed key is a digit
+      lcd.print(key);
+      static int count = 0;
+      static int number = 0;
+
+      number = (number * 10) + (key - '0');  // Build the three-digit number
+
+      count++;
+
+      if (count == 3) {  // Once three digits are entered
+        Serial.println("Three-digit number entered: " + String(number));
+        count = 0;
+        servo.write(number);
+      }
+    }
+  }
 }
