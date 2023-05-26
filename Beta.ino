@@ -4,6 +4,7 @@
 
 #define potentiometer A0
 #define servo_pin 5
+Servo servo;
 
 char key;
 int currentValue = 0;
@@ -24,16 +25,15 @@ byte colPins[COLS] = { 9, 8, 7, 6 };
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 Adafruit_LiquidCrystal lcd(0);
-Servo servo;
 
 void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
-  servo.attach(servo_pin);
-  servo.write(0);
   lcd.print("Select Mode: ");
+  servo.attach(5);
+  servo.write(0);
 }
 
 void loop() {
