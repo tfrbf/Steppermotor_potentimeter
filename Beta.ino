@@ -44,6 +44,7 @@ void loop() {
     if (key == 'A') {
       lcd.clear();
       lcd.print("pot mode");
+      Serial.println(key);
       delay(1000);
       while (key == 'A') potentiometer_mode();
     }
@@ -51,6 +52,7 @@ void loop() {
     if (key == 'B') {
       lcd.clear();
       lcd.print("Keypad mode");
+      Serial.println(key);
       delay(1000);
       lcd.clear();
       lcd.print("Angle: ");
@@ -65,6 +67,7 @@ void loop() {
 
 void potentiometer_mode() {
   currentValue = analogRead(potentiometer);
+  Serial.println(currentValue);
   position = map(currentValue, 0, 1023, 0, 180);
   servo.write(position);
   // If the value has changed, update the LCD display
