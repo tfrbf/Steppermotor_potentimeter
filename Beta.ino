@@ -1,6 +1,9 @@
 #include <Servo.h>
 #include <Keypad.h>
-#include <Adafruit_LiquidCrystal.h>
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x3F for a 16 chars and 2 line display
+
 
 #define potentiometer A0
 #define servo_pin 5
@@ -24,12 +27,14 @@ byte rowPins[ROWS] = { 13, 12, 11, 10 };
 byte colPins[COLS] = { 9, 8, 7, 6 };      
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-Adafruit_LiquidCrystal lcd(0);
 
 void setup() {
   Serial.begin(9600);
-  lcd.begin(16, 2);
-  pinMode(LED_BUILTIN, OUTPUT);
+   Wire.begin();
+  lcd.init();
+    lcd.backlight();
+
+  pinMode(2, INPUT);
   Serial.begin(9600);
   lcd.print("Select Mode: ");
   servo.attach(5);
@@ -69,7 +74,7 @@ void potentiometer_mode() {
   currentValue = analogRead(potentiometer);
   Serial.println(currentValue);
   position = map(currentValue, 0, 1023, 0, 180);
-  servo.write(position);
+  if (digitalRead(2) == HIGH) servo.write(position);
   // If the value has changed, update the LCD display
   if (currentValue != previousValue) {
     lcd.clear();
